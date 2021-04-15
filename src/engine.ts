@@ -1,17 +1,19 @@
 import { Engine } from 'node-uci';
 import { IMover } from './mover';
+import { tot } from 'tobil';
+import { at } from 'apil';
 
 export default class EngineMover implements IMover {
 
   engine: Engine
   ready: boolean = false
-  queue: Promise<string|undefined>
+  queue: Promise<tot.PlayStateAction[] |undefined>
   
   constructor(path: string) {
 
     this.engine = new Engine(path);
 
-    this.queue = Promise.resolve('');
+    this.queue = Promise.resolve([]);
   }
 
   async init() {
@@ -38,11 +40,20 @@ export default class EngineMover implements IMover {
     });
   }
 
-  async move(position: string, moves: Array<string>) {
+  async move(position: string, moves: Array<string>, state: tot.PlayState) {
     this.queue = this.queue.then(() =>
-      this.baseMove(position, moves));
+      this.baseMove(position, moves).then(_ => [_]));
 
     return this.queue;
   }
-  
+
+  async chat(chat: at.ChatLine) {
+    return [];
+  }
+
+  async abort(status: at.GameStatus) {
+    
+  }
+
+  greeting: string = 'Stockfish 13 is playing';
 }
